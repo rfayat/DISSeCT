@@ -9,6 +9,18 @@ from ahrs.filters import EKF
 import scipy
 
 
+def get_angle(u, v, degrees=True):
+    "Return the angle between two vectors or two sets of vectors."
+    dot = np.multiply(u, v).sum(axis=-1)
+    u_norm, v_norm = np.linalg.norm(u, axis=-1), np.linalg.norm(v, axis=-1)
+    dot_normalized = dot / (u_norm * v_norm)
+    # Compute the arc-cosine of the normalized dot product
+    if degrees:
+        return np.degrees(np.arccos(dot_normalized))
+    else:
+        return np.arccos(dot_normalized)
+
+
 def compute_quaternion_sensor2earth(gyr, acc, sr=300.):
     """Compute attitude from inertial data, return them with order xyzw.
     
