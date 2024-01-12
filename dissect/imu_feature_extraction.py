@@ -4,7 +4,7 @@ Author: Romain FAYAT, February 2022
 """
 import pandas as pd
 import numpy as np
-from SphereProba.distributions import VonMisesFisher, _fit_kent
+from SphereProba.distributions import VonMisesFisher
 import scipy.stats
 from scipy.spatial.transform import Rotation as R
 from dissect.data_loading import COL_ACC_G, COL_GYR, COL_QUAT, COL_ACC_R, SR
@@ -48,51 +48,24 @@ def tilt_from_euclidean(X, degrees=True):
         return np.c_[roll, pitch]
 
 
+def _fit_vMF(X, weights=None):
+    "Fit a von Mises Fisher on 3D input data and return the MLE parameters"
+    n_dim = 3
+    X = X / np.linalg.norm(X, axis=1, keepdims=True)
+    X_av = np.average(X, axis=0, weights=weights)
+    # Simple approximation (Sra, 2011)
+    R = np.linalg.norm(X_av)
+    kappa_est = R * (n_dim - R**2) / (1 - R**2)
+
+    return X_av / R, kappa_est
+
+
 def extract_vmf_features(X, prepend=""):
     "Features extracted by fitting a vMF distribution on X."
-    vmf = VonMisesFisher.fit(X)
-    dispersion = np.sqrt(1 / vmf.kappa)
+    mu, kappa = _fit_vMF(X)
+    dispersion = np.sqrt(1 / kappa)
     features_names = ["dispersion", "mux", "muy", "muz"]
-    features = [dispersion, *vmf.mu.squeeze()]
-    return {f"{prepend}{k}": f for k, f in zip(features_names, features)}
-
-
-def extract_kent_features(X, prepend=""):
-    """Features extracted by fitting a Kent distribution on X.
-    
-    Returns
-    -------
-    roll :
-        Roll of the distribution's centroid (in degrees)
-    pitch :
-        Roll of the distribution's centroid (in degrees)
-    theta :
-        Angle between the ellipsoid's main axis and the vertical (in degrees) 
-    kappa :
-        Dispersion of the distribution
-    beta :
-        Ellipticity of the distribution
-
-    Notes
-    -----
-    We use _fit_kent instead of the Kent object to bypass the assertion on
-    the fitted parameters. The approximation used in SphereProba (Kent 1982)
-    indeed holds for kappa>>beta. In our case, we will get large values of
-    beta for narrow distributions (e.g. arc on the sphere). The parameter
-    estimate is therefore not very accurate but still will yield parameters
-    reflecting the elongation of the ellipsoid on the sphere.
-
-    """
-    gamma, kappa, beta = _fit_kent(X, np.ones(len(X)))
-    mu = gamma[[0]]
-    roll, pitch = tilt_from_euclidean(mu).squeeze()
-    theta = get_angle(gamma[1], np.array([0., 0., 1.]))
-
-    kappa = np.clip(kappa, 1e-6, None)
-    beta = np.clip(beta, 1e-6, None)
-
-    features_names = ["roll", "pitch", "theta", "logkappa", "logbeta"]
-    features = [roll, pitch, theta, np.log(kappa), np.log(beta)]
+    features = [dispersion, *mu.squeeze()]
     return {f"{prepend}{k}": f for k, f in zip(features_names, features)}
 
 
@@ -186,7 +159,7 @@ def compute_ts_features(X, columns=None):
 def compute_tilt_features(X, sr=SR):
     "Features derived from tilt (accG)."
     duration = len(X) / sr
-    # Kent features for tilt
+    # von Mises-Fisher features for tilt
     vmf_attitude = extract_vmf_features(X, prepend="attitude_")
 
     # Tilt change between the 1st and last sample
@@ -212,7 +185,7 @@ def compute_tilt_features(X, sr=SR):
 def compute_azimuth_features(X, sr=SR):
     "Features derived from 3D azimuth."
     duration = len(X) / sr
-    # Kent features for the 3D azimuth
+    # von Mises-Fisher features for the 3D azimuth
     vmf_azimuth = extract_vmf_features(X, prepend="azimuth_")
 
     # Angle between the first and last sample
