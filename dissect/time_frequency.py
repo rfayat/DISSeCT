@@ -92,7 +92,7 @@ def get_linearly_spaced_cwt(x, fmin=2.5, fmax=20, nbins=7, **kwargs):
     bins = np.linspace(fmin, fmax, nbins + 1)    
     out = pd.DataFrame(index=index)
     
-    for i, (f_low, f_high) in enumerate(zip(bins[:-1], bins[1:])):
+    for f_low, f_high in zip(bins[:-1], bins[1:]):
         col = f"{prepend}{f_low:.1f}-{f_high:.1f}"
         is_selected = (f >= f_low) & (f < f_high)
         out[col] = np.mean(W_abs[:, is_selected], axis=1)
