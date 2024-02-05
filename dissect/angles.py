@@ -98,3 +98,17 @@ def interpolate_saturated(X, threshold=999):
                                             kind="cubic")
         X_new[:, i] = interp(t)
     return X_new
+
+
+def get_azimuth_estimate(q_sensor2earth, first_sample_azimuth_zero=False):
+    "Azimuth estimate from AHRS quaternions."
+    r_sensor2earth = R.from_quat(q_sensor2earth)
+    x_sensor = np.array([1., 0., 0.])
+    azimuth = r_sensor2earth.apply(x_sensor)
+    
+    # Align the first sample with the x axis
+    if first_sample_azimuth_zero:
+        rot = get_rot_align_azimuth(np.array([1., 0., 0.]), azimuth[0])
+        azimuth = rot.apply(azimuth)
+    
+    return azimuth
