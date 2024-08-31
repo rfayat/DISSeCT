@@ -5,8 +5,16 @@ Parts of the code are from the companion code for FAYAT et al. 2021:
 """
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from ahrs.filters import EKF
 import scipy
+
+try:
+    from ahrs_cython.filters import EKF
+except (ModuleNotFoundError, ImportError):
+    print("Could not find module ahrs_cython.\n"
+          "Falling back on the pure Python implementation of the ahrs module (much slower).\n"
+          "For computational efficiency you can follow the instructions at:\n"
+          "https://github.com/rfayat/AHRS_cython\n")
+    from ahrs.filters import EKF
 
 
 def get_angle(u, v, degrees=True):

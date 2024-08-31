@@ -4,7 +4,6 @@ Author: Romain FAYAT, February 2022
 """
 import pandas as pd
 import numpy as np
-from SphereProba.distributions import VonMisesFisher
 import scipy.stats
 from scipy.spatial.transform import Rotation as R
 from dissect.data_loading import COL_ACC_G, COL_GYR, COL_QUAT, COL_ACC_R, SR

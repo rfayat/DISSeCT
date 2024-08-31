@@ -16,7 +16,7 @@ Alternatively you can create the environment as follows:
 ```bash
 $ conda create -c conda-forge --name dissect python=3.7.6 cython=0.29.17 ipython=7.13.0 ipykernel=5.1.4 jupyter=1.0.0 matplotlib=3.1.3 notebook=6.0.3 numpy=1.21.5 pandas=1.3.5 scikit-learn=0.23.2 scipy=1.7.3 seaborn=0.12.2 umap-learn=0.5.2
 $ conda activate dissect
-$ pip install ahrs==0.3.1 distinctipy==1.2.2 ruptures==1.1.6 ssqueezepy==0.6.3
+$ pip install ahrs==0.3.0 distinctipy==1.2.2 ruptures==1.1.6 ssqueezepy==0.6.3
 ```
 
 
@@ -26,6 +26,13 @@ You can now activate the environment and launch jupyter notebook to run the exam
 $ conda activate dissect
 $ jupyter notebook
 ```
+### Additional requirement for fast attitude estimate
+The pure-python implementation of the Extended Kalman Filter for attitude estimate from inertial data provided in the [ahrs toolbox](https://ahrs.readthedocs.io/en/latest/) is not designed for efficiency and is therefore very slow. To circumvent this issue, I reimplemented some AHRS filters in a compilable version with Cython, using [Mayitzin/ahrs](https://github.com/Mayitzin/ahrs) as Python wrappers, yielding much better computation time while being easy to integrate in computation pipelines written in Python.
+
+After activating your virtual environment, you can install this Cython version of AHRS filters by running the installation instructions from [rfayat/AHRS_cython](https://github.com/rfayat/AHRS_cython).
+
+In case you did not manage to complete this step (e.g. compilation issue), the pipeline will fall back on the pure-Python implementation of the Extended Kalman Filter but will be much slower to run.
+
 
 ### Additional requirements for polar plots
 
