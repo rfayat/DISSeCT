@@ -1,8 +1,7 @@
 # DISSeCT
 Decomposition of Inertial Sequences by Segmentation and Clustering in Tandem.
 
-Companion code for Fayat et al. 2024.
-
+Companion code for [Fayat et al. 2024. (preprint)](https://www.biorxiv.org/content/10.1101/2024.09.20.613901v1), doi:[10.1101/2024.09.20.613901](https://doi.org/10.1101/2024.09.20.613901). If you use parts of this code in a scientific publication, please be kind enough to include a citation of the original paper.
 
 ## Installation
 
